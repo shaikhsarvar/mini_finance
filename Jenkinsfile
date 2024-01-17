@@ -5,13 +5,13 @@ pipeline {
         stage('Package') {
             steps {
                 echo 'Building..'
-                sh 'rm -rf /var/www/html/'
+                sh 'rm -rf /var/www/html/*'
             }
         }
         stage('Build') {
             steps {
                 echo 'Building....'
-                sh 'cp -r * /var/www/html/'
+                sh 'cp -r * /var/www/html'
             }
         }
         stage('Deploy') {
