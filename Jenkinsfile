@@ -5,7 +5,7 @@ pipeline {
         stage('Package') {
             steps {
                 echo 'Building..'
-                sh 'rm rf /var/www/html/'
+                sh 'rm -rf /var/www/html/'
             }
         }
         stage('Build') {
