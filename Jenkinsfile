@@ -2,22 +2,32 @@ pipeline {
     agent any
 
     stages {
-        stage('Package') {
+        stage('Git Scm') {
             steps {
-                echo 'Building..'
+                echo 'checkout to main'
+                git branch: 'main', url: 'https://github.com/shaikhsarvar/mini_finance.git'
+            }
+        }
+
+        stage('Clean up') {
+            steps {
+                echo 'clean up directory'
                 sh 'rm -rf /var/www/html/*'
             }
         }
+
         stage('Build') {
             steps {
-                echo 'Building....'
-                sh 'cp -r * /var/www/html'
+                echo 'building the app....'
+                sh 'cp -r * /var/www/html/'
             }
         }
+
         stage('Deploy') {
             steps {
-                echo 'Deploying to jenkins public ip on port 80.'
+                echo 'Deploying the app on jenkins public ip on port 80'
             }
         }
     }
 }
+
