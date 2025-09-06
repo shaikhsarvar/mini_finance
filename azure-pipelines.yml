@@ -34,7 +34,7 @@ steps:
     docker run -d --name ubuntu-app -p 9090:80 $(dockerHubUsername)/$(imageName):$(imageTag)
 
     echo "Deployment complete. Access app at: http://localhost:9090/"
-    displayName: 'Deploy Docker Container on Local PC'
+  displayName: 'Deploy Docker Container on Local PC'
 
 
 
