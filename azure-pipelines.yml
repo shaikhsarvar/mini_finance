@@ -1,6 +1,4 @@
 trigger:
-- main  # Or your branch name
-trigger:
 - main  # Or your specific branch name
 
 pool:
