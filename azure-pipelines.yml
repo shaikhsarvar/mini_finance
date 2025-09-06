@@ -1,22 +1,43 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+- main  # Or your branch name
+trigger:
+- main  # Or your specific branch name
 
 pool:
-  vmImage: ubuntu-latest
+  name: 'local pc'  # Your self-hosted agent name
+
+variables:
+  dockerHubUsername: 'sksarvar'
+  imageName: 'ubuntu-app'
+  imageTag: 'v2.1'
+  dockerRegistryServiceConnection: 'dockerhub-azuredevops'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+# 🛠️ Build and Push Docker Image to Docker Hub
+- task: Docker@2
+  displayName: 'Build and Push Docker Image to Docker Hub'
+  inputs:
+    containerRegistry: $(dockerRegistryServiceConnection)
+    repository: '$(dockerHubUsername)/$(imageName)'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      $(imageTag)
 
+# 🚀 Deploy Docker Container Locally
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    echo "Pulling image from Docker Hub..."
+    docker pull $(dockerHubUsername)/$(imageName):$(imageTag)
+
+    echo "Stopping existing container (if any)..."
+    docker rm -f ubuntu-app || true
+
+    echo "Running container on port 8080..."
+    docker run -d --name ubuntu-app -p 8080:80 $(dockerHubUsername)/$(imageName):$(imageTag)
+
+    echo "Deployment complete. Access app at: http://localhost:8080/"
+  displayName: 'Deploy Docker Container on Local PC'
+
 
 
 
