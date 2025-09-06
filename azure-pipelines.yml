@@ -30,11 +30,11 @@ steps:
     echo "Stopping existing container (if any)..."
     docker rm -f ubuntu-app || true
 
-    echo "Running container on port 8080..."
-    docker run -d --name ubuntu-app -p 8080:80 $(dockerHubUsername)/$(imageName):$(imageTag)
+    echo "Running container on port 9090..."
+    docker run -d --name ubuntu-app -p 9090:80 $(dockerHubUsername)/$(imageName):$(imageTag)
 
-    echo "Deployment complete. Access app at: http://localhost:8080/"
-  displayName: 'Deploy Docker Container on Local PC'
+    echo "Deployment complete. Access app at: http://localhost:9090/"
+    displayName: 'Deploy Docker Container on Local PC'
 
 
 
