@@ -1,41 +1,48 @@
 trigger:
-- main  # Or your specific branch name
+- main
 
 pool:
-  name: 'local pc'  # Your self-hosted agent name
+  name: 'local pc'  # Your self-hosted agent
 
 variables:
+  - group: sonar-Analysis-minifinace
   dockerHubUsername: 'sksarvar'
   imageName: 'ubuntu-app'
   imageTag: 'v2.1'
-  dockerRegistryServiceConnection: 'dockerhub-azuredevops'
 
 steps:
-# 🛠️ Build and Push Docker Image to Docker Hub
+
+# 🔧 Install SonarScanner CLI (optional if already available)
+- script: |
+    choco install sonarscanner -y
+  displayName: 'Install SonarScanner'
+  condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+# 🛠️ Build and Push Docker Image
 - task: Docker@2
-  displayName: 'Build and Push Docker Image to Docker Hub'
+  displayName: 'Build and Push Docker Image'
   inputs:
-    containerRegistry: $(dockerRegistryServiceConnection)
+    containerRegistry: 'dockerhub-azuredevops'
     repository: '$(dockerHubUsername)/$(imageName)'
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
     tags: |
       $(imageTag)
 
-# 🚀 Deploy Docker Container Locally
+# 🚀 Deploy Locally
 - script: |
-    echo "Pulling image from Docker Hub..."
     docker pull $(dockerHubUsername)/$(imageName):$(imageTag)
-
-    echo "Stopping existing container (if any)..."
     docker rm -f ubuntu-app || true
-
-    echo "Running container on port 9090..."
     docker run -d --name ubuntu-app -p 9090:80 $(dockerHubUsername)/$(imageName):$(imageTag)
-
-    echo "Deployment complete. Access app at: http://localhost:9090/"
   displayName: 'Deploy Docker Container on Local PC'
 
-
-
-
+# 🔍 SonarQube Analysis
+- script: |
+    sonar-scanner \
+      -Dsonar.projectKey=ubuntu-app \
+      -Dsonar.sources=. \
+      -Dsonar.host.url=$(SONAR_HOST_URL) \
+      -Dsonar.login=$(SONAR_TOKEN)
+  displayName: 'Run SonarQube Analysis'
+  env:
+    SONAR_TOKEN: $(SONAR_TOKEN)
