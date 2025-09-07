@@ -5,7 +5,7 @@ pool:
   name: 'local pc'  # Your self-hosted agent pool name
 
 variables:
-  - group: sonar-Analysis-minifinace  # ✅ Your variable group
+  - group: sonar-Analysis-minifinace  # Your variable group with SONAR_HOST_URL and SONAR_TOKEN
 
   dockerHubUsername: 'sksarvar'
   imageName: 'ubuntu-app'
