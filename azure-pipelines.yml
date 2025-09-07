@@ -12,12 +12,17 @@ variables:
   sonarProjectKey: 'mini-finance'   # Change as needed
   sonarHostUrl: 'http://localhost:9000'  # Your SonarQube URL
   sonarLogin: '$(SONAR_TOKEN)'  # Store your SonarQube token in pipeline secrets
+  dockerfilePath: '**/Dockerfile'  # Optional: adjust if Dockerfile location changes
 
 steps:
+# Checkout the repo first
+- checkout: self
+  displayName: 'Checkout source code'
+
 # 1. Prepare SonarQube Analysis
 - task: SonarQubePrepare@5
   inputs:
-    SonarQube: 'SonarQube'  # Name of the SonarQube service connection you created
+    SonarQube: 'SonarQube'  # Name of your SonarQube service connection
     scannerMode: 'CLI'
     configMode: 'manual'
     cliProjectKey: '$(sonarProjectKey)'
@@ -25,8 +30,9 @@ steps:
     cliHostUrl: '$(sonarHostUrl)'
     cliLogin: '$(sonarLogin)'
 
-# 2. Run SonarQube Scanner (using CLI)
+# 2. Run SonarQube Scanner (fail if error)
 - script: |
+    set -e
     sonar-scanner
   displayName: 'Run SonarQube Scanner'
 
@@ -40,7 +46,7 @@ steps:
     containerRegistry: $(dockerRegistryServiceConnection)
     repository: '$(dockerHubUsername)/$(imageName)'
     command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
+    Dockerfile: '$(dockerfilePath)'
     tags: |
       $(imageTag)
 
