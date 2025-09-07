@@ -1,11 +1,11 @@
 trigger:
-- main  # Or your branch name
+- main  # Or replace with your actual branch
 
 pool:
-  name: 'local pc'  # Self-hosted agent pool
+  name: 'local pc'  # Your self-hosted agent pool name
 
 variables:
-  - group: sonar-Analysis-minifinace  # Your variable group name
+  - group: sonar-Analysis-minifinace  # ✅ Your variable group
 
   dockerHubUsername: 'sksarvar'
   imageName: 'ubuntu-app'
@@ -27,13 +27,15 @@ steps:
 
 # 🚀 Deploy Locally
 - script: |
+    echo "Deploying Docker image..."
     docker pull $(dockerHubUsername)/$(imageName):$(imageTag)
     docker rm -f ubuntu-app || true
     docker run -d --name ubuntu-app -p 9090:80 $(dockerHubUsername)/$(imageName):$(imageTag)
   displayName: 'Deploy Docker Container on Local PC'
 
-# 🔍 Run SonarQube Analysis (no service connection needed)
+# 🔍 SonarQube Analysis
 - script: |
+    echo "Running SonarQube analysis..."
     sonar-scanner \
       -Dsonar.projectKey=ubuntu-app \
       -Dsonar.sources=. \
