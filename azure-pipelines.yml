@@ -40,10 +40,6 @@ steps:
     -Dsonar.branch.name=""
   displayName: 'Run SonarQube Scanner (Full Path)'
 
-
-# 📈 3. Publish SonarQube Results
-- task: SonarQubeAnalyze@5
-
 # 🛠️ 4. Build and Push Docker Image
 - task: Docker@2
   displayName: 'Build and Push Docker Image to Docker Hub'
