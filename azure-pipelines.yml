@@ -9,20 +9,20 @@ variables:
   imageName: 'ubuntu-app'
   imageTag: 'v2.1'
   dockerRegistryServiceConnection: 'dockerhub-azuredevops'
-  sonarProjectKey: 'mini-finance'   # Change as needed
-  sonarHostUrl: 'http://localhost:9000'  # Your SonarQube URL
-  sonarLogin: '$(SONAR_TOKEN)'  # Store your SonarQube token in pipeline secrets
-  dockerfilePath: '**/Dockerfile'  # Optional: adjust if Dockerfile location changes
+  sonarProjectKey: 'mini-finance'
+  sonarHostUrl: 'http://localhost:9000'
+  sonarLogin: '$(SONAR_TOKEN)'  # Store as a secret variable in pipeline
+  dockerfilePath: '**/Dockerfile'
 
 steps:
-# Checkout the repo first
+# 🧾 Checkout the repo
 - checkout: self
   displayName: 'Checkout source code'
 
-# 1. Prepare SonarQube Analysis
+# 🔍 1. Prepare SonarQube Analysis
 - task: SonarQubePrepare@5
   inputs:
-    SonarQube: 'SonarQube'  # Name of your SonarQube service connection
+    SonarQube: 'SonarQube'  # Your SonarQube service connection name
     scannerMode: 'CLI'
     configMode: 'manual'
     cliProjectKey: '$(sonarProjectKey)'
@@ -30,16 +30,19 @@ steps:
     cliHostUrl: '$(sonarHostUrl)'
     cliLogin: '$(sonarLogin)'
 
-# 2. Run SonarQube Scanner (fail if error)
+# 🚀 2. Run SonarQube Scanner (using full path to fix PATH issue)
 - script: |
-    set -e
-    sonar-scanner
-  displayName: 'Run SonarQube Scanner'
+    "C:\sonar-scanner\bin\sonar-scanner.bat" ^
+    -Dsonar.projectKey=$(sonarProjectKey) ^
+    -Dsonar.sources=. ^
+    -Dsonar.host.url=$(sonarHostUrl) ^
+    -Dsonar.login=$(sonarLogin)
+  displayName: 'Run SonarQube Scanner (Full Path)'
 
-# 3. Publish SonarQube analysis results
+# 📈 3. Publish SonarQube Results
 - task: SonarQubeAnalyze@5
 
-# 4. Build and Push Docker Image to Docker Hub
+# 🛠️ 4. Build and Push Docker Image
 - task: Docker@2
   displayName: 'Build and Push Docker Image to Docker Hub'
   inputs:
@@ -50,7 +53,7 @@ steps:
     tags: |
       $(imageTag)
 
-# 5. Deploy Docker Container Locally
+# 🚀 5. Deploy Docker Container Locally
 - script: |
     echo "Pulling image from Docker Hub..."
     docker pull $(dockerHubUsername)/$(imageName):$(imageTag)
