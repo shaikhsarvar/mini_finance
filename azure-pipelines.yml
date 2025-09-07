@@ -1,20 +1,17 @@
 trigger:
-- main  # Or replace with your actual branch
+- main  # Or your specific branch name
 
 pool:
-  name: 'local pc'  # Your self-hosted agent pool name
+  name: 'local pc'  # Your self-hosted agent name
 
 variables:
-  - group: sonar-Analysis-minifinace  # Your variable group with SONAR_HOST_URL and SONAR_TOKEN
-
   dockerHubUsername: 'sksarvar'
   imageName: 'ubuntu-app'
   imageTag: 'v2.1'
   dockerRegistryServiceConnection: 'dockerhub-azuredevops'
 
 steps:
-
-# 🛠️ Build & Push Docker Image
+# 🛠️ Build and Push Docker Image to Docker Hub
 - task: Docker@2
   displayName: 'Build and Push Docker Image to Docker Hub'
   inputs:
@@ -25,22 +22,20 @@ steps:
     tags: |
       $(imageTag)
 
-# 🚀 Deploy Locally
+# 🚀 Deploy Docker Container Locally
 - script: |
-    echo "Deploying Docker image..."
+    echo "Pulling image from Docker Hub..."
     docker pull $(dockerHubUsername)/$(imageName):$(imageTag)
+
+    echo "Stopping existing container (if any)..."
     docker rm -f ubuntu-app || true
+
+    echo "Running container on port 9090..."
     docker run -d --name ubuntu-app -p 9090:80 $(dockerHubUsername)/$(imageName):$(imageTag)
+
+    echo "Deployment complete. Access app at: http://localhost:9090/"
   displayName: 'Deploy Docker Container on Local PC'
 
-# 🔍 SonarQube Analysis
-- script: |
-    echo "Running SonarQube analysis..."
-    sonar-scanner \
-      -Dsonar.projectKey=ubuntu-app \
-      -Dsonar.sources=. \
-      -Dsonar.host.url=$(SONAR_HOST_URL) \
-      -Dsonar.login=$(SONAR_TOKEN)
-  displayName: 'Run SonarQube Analysis'
-  env:
-    SONAR_TOKEN: $(SONAR_TOKEN)
+
+
+
