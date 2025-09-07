@@ -1,28 +1,24 @@
 trigger:
-- main
+- main  # Or your branch name
 
 pool:
-  name: 'local pc'  # Your self-hosted agent
+  name: 'local pc'  # Self-hosted agent pool
 
 variables:
-  - group: sonar-Analysis-minifinace
+  - group: sonar-Analysis-minifinace  # Your variable group name
+
   dockerHubUsername: 'sksarvar'
   imageName: 'ubuntu-app'
   imageTag: 'v2.1'
+  dockerRegistryServiceConnection: 'dockerhub-azuredevops'
 
 steps:
 
-# 🔧 Install SonarScanner CLI (optional if already available)
-- script: |
-    choco install sonarscanner -y
-  displayName: 'Install SonarScanner'
-  condition: eq( variables['Agent.OS'], 'Windows_NT' )
-
-# 🛠️ Build and Push Docker Image
+# 🛠️ Build & Push Docker Image
 - task: Docker@2
-  displayName: 'Build and Push Docker Image'
+  displayName: 'Build and Push Docker Image to Docker Hub'
   inputs:
-    containerRegistry: 'dockerhub-azuredevops'
+    containerRegistry: $(dockerRegistryServiceConnection)
     repository: '$(dockerHubUsername)/$(imageName)'
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
@@ -36,7 +32,7 @@ steps:
     docker run -d --name ubuntu-app -p 9090:80 $(dockerHubUsername)/$(imageName):$(imageTag)
   displayName: 'Deploy Docker Container on Local PC'
 
-# 🔍 SonarQube Analysis
+# 🔍 Run SonarQube Analysis (no service connection needed)
 - script: |
     sonar-scanner \
       -Dsonar.projectKey=ubuntu-app \
