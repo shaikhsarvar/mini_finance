@@ -37,7 +37,7 @@ steps:
     -Dsonar.sources=. ^
     -Dsonar.host.url=$(sonarHostUrl) ^
     -Dsonar.login=$(sonarLogin) ^
-    -Dsonar.branch.name=""  # Disable branch analysis
+    -Dsonar.branch.name=""
   displayName: 'Run SonarQube Scanner (Full Path)'
 
 
