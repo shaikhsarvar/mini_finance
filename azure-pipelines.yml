@@ -36,8 +36,10 @@ steps:
     -Dsonar.projectKey=$(sonarProjectKey) ^
     -Dsonar.sources=. ^
     -Dsonar.host.url=$(sonarHostUrl) ^
-    -Dsonar.login=$(sonarLogin)
+    -Dsonar.login=$(sonarLogin) ^
+    -Dsonar.branch.name=""  # Disable branch analysis
   displayName: 'Run SonarQube Scanner (Full Path)'
+
 
 # 📈 3. Publish SonarQube Results
 - task: SonarQubeAnalyze@5
