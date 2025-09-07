@@ -9,9 +9,31 @@ variables:
   imageName: 'ubuntu-app'
   imageTag: 'v2.1'
   dockerRegistryServiceConnection: 'dockerhub-azuredevops'
+  sonarProjectKey: 'mini-finance'   # Change as needed
+  sonarHostUrl: 'http://localhost:9000'  # Your SonarQube URL
+  sonarLogin: '$(SONAR_TOKEN)'  # Store your SonarQube token in pipeline secrets
 
 steps:
-# 🛠️ Build and Push Docker Image to Docker Hub
+# 1. Prepare SonarQube Analysis
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: 'SonarQube'  # Name of the SonarQube service connection you created
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: '$(sonarProjectKey)'
+    cliSources: '.'
+    cliHostUrl: '$(sonarHostUrl)'
+    cliLogin: '$(sonarLogin)'
+
+# 2. Run SonarQube Scanner (using CLI)
+- script: |
+    sonar-scanner
+  displayName: 'Run SonarQube Scanner'
+
+# 3. Publish SonarQube analysis results
+- task: SonarQubeAnalyze@5
+
+# 4. Build and Push Docker Image to Docker Hub
 - task: Docker@2
   displayName: 'Build and Push Docker Image to Docker Hub'
   inputs:
@@ -22,7 +44,7 @@ steps:
     tags: |
       $(imageTag)
 
-# 🚀 Deploy Docker Container Locally
+# 5. Deploy Docker Container Locally
 - script: |
     echo "Pulling image from Docker Hub..."
     docker pull $(dockerHubUsername)/$(imageName):$(imageTag)
@@ -35,7 +57,3 @@ steps:
 
     echo "Deployment complete. Access app at: http://localhost:9090/"
   displayName: 'Deploy Docker Container on Local PC'
-
-
-
-
